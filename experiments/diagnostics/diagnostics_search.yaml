@@ -1,0 +1,9 @@
+data:
+  path:
+  - 'data/airfoil.data'
+  - 'data/bikesharing.data'
+  - 'data/energy.data'
+rng:
+- 1
+- 2
+- 3

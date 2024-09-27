@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 def train_bde(config: 'Config', n_devices: int):
     """Train a BDE model for a given configuration."""
-    from module_sandbox.training.trainer import BDETrainer  # noqa
+    from src.training.trainer import BDETrainer  # noqa
 
     n_devices = min(n_devices, config.n_chains)
     os.environ['XLA_FLAGS'] = f'--xla_force_host_platform_device_count={n_devices}'
@@ -76,7 +76,7 @@ if __name__ == '__main__':
         logging.basicConfig(level=logging.WARNING)
 
     # Import here not to slow down the --help flag
-    from module_sandbox.config.core import Config
+    from src.config.core import Config
 
     if not config_path.exists():
         raise FileNotFoundError(

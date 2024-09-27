@@ -1,0 +1,12 @@
+training:
+  sampler:
+    num_effective_samples:
+    - 10
+    - 50
+    - 100
+    - 150
+    - 200
+rng:
+- 1
+- 2
+- 3

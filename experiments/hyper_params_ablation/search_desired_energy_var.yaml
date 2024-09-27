@@ -1,0 +1,15 @@
+training:
+  sampler:
+    desired_energy_var_start:
+    - 0.1
+    - 0.5
+    - 1.0
+    - 10.0
+    - 100.0
+    desired_energy_var_end:
+    - 0.1
+    - 0.05
+rng:
+- 1
+- 2
+- 3

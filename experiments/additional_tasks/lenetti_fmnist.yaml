@@ -1,0 +1,45 @@
+saving_dir: 'results/additional_tasks/'
+experiment_name: 'fash_lenetti'
+data:
+  path: 'data/generated_data/fashion_mnist'
+  source: 'torchvision'
+  data_type: 'image'
+  task: 'class'
+  datapoint_limit: 60000
+  train_split: 0.8
+  valid_split: 0.2
+  test_split: 0.0 # not used for images (full test set is used)
+model:
+  model: LeNetti
+  activation: 'relu'
+  out_dim: 10
+  use_bias: true
+training:
+  warmstart:
+    include: true
+    optimizer_config:
+      name: 'adamw'
+      parameters: {'learning_rate': 0.001, 'weight_decay': 0.005}
+    warmstart_exp_dir: null
+    max_epochs: 1000
+    batch_size: 32
+    patience: 4
+  sampler:
+    name: 'mclmc'
+    warmup_steps: 50000
+    n_chains: 10
+    n_samples: 10000
+    use_warmup_as_init: true
+    n_thinning: 100
+    diagonal_preconditioning: false
+    desired_energy_var_start: 0.5
+    desired_energy_var_end: 0.1
+    trust_in_estimate: 1.5
+    num_effective_samples: 100
+    step_size_init: 0.001
+    keep_warmup: false
+    prior_config:
+      name: 'StandardNormal'
+      parameters: {}
+rng: 42
+logging: true

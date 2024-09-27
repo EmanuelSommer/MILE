@@ -170,7 +170,6 @@ paper_bde/rf_tuning_results.csv
 checkpoints/*
 .DS_Store
 
-experiments/subspace_inf/results_and_plots/*
 data/generated_data/*
 
 # logs

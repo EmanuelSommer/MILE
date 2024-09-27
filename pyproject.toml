@@ -1,43 +1,34 @@
 [tool.poetry]
-name = "probabilisticml-sandbox"
+name = "MILE"
 version = "0.1.0"
-description = "Sandbox Enviroment for the ProbML Toolset"
+description = "Implementation of Microcanonical Langevin Ensembles (MILE)."
 authors = []
 readme = "README.md"
-license = "LICENSE"
 package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.10"
-pre-commit = "^3.6.2"
 jax = "0.4.28"
 blackjax = "1.2.2"
 optax = "^0.2.1"
 orbax = "^0.1.9"
 numpyro = "^0.14.0"
 flax = "^0.8.2"
-arviz = "^0.17.1"
 matplotlib = "^3.8.0"
 jupyter = "1.0.0"
 pandas = "2.1.1"
 typer = "0.9.0"
 seaborn = "^0.13.0"
-scikit-learn = "1.3.2"
 clu = "0.0.9"
-plotly = "^2.0.0"
-streamlit = "^1.31.1"
 nbconvert = "^7.16.4"
+numpy = "1.26.4"
+scikit-learn = "^1.5.2"
 
 [tool.poetry.group.cuda]
 optional = true
 
 [tool.poetry.group.cuda.dependencies]
 jax = {version="0.4.28", extras=["cuda12"]}
-
-[tool.poetry.group.proba]
-optional = true
-[tool.poetry.group.proba.dependencies]
-probabilisticml = {git = "https://github.com/lisa-wm/probabilisticml.git"}
 
 [tool.poetry.group.vision]
 optional = true
