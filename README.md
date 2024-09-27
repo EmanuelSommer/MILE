@@ -1,17 +1,17 @@
 # Microcanonical Langevin Ensembles (MILE)
 
-This repository contains the code for the ICLR 2025 submission **"Microcanonical Langevin Ensembles: Advancing the Sampling of Bayesian Neural Networks"**. A flowchart of the proposed method is shown below:
-
 <p align="center">
-    <img src="flowchart.png" alt="Flowchart" style="width: 75%;">
+    <img src="flowchart.png" alt="Flowchart" style="width: 70%;">
 </p>
+
+This repository contains the code for the **ICLR 2025** submission **"Microcanonical Langevin Ensembles: Advancing the Sampling of Bayesian Neural Networks"**. A flowchart summarizing the proposed method is shown above.
 
 ## Setup
 
 We use python `3.10` (higher stable versions should work as well) and [Poetry](https://python-poetry.org/) (make sure you have it installed) to manage dependencies. To install the dependencies within a virtual environment, run the following commands:
 
 ```bash
-python3 -m venv venv
+python -m venv venv
 source venv/bin/activate
 poetry install --with nlp,vision
 ```
