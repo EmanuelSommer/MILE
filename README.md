@@ -65,10 +65,11 @@ python train.py -c experiments/diagnostics/mclmc.yaml -d 12 -s experiments/diagn
 
 All the experiments will save their results in the dedicated subfolder of the `results/` folder. The results contain:
 
-- the configuration file used for the experiment
-- the posterior samples of the model
-- metrics and diagnostics computed during training
-- `.html` report with some useful visualizations, diagnostics and metrics
+- The `config.yaml` configuration file used for the experiment
+- The trained deep ensemble models within the `warmstart/` folder
+- The posterior samples of the model in the `samples/` folder
+- Metrics, diagnostics and training logs
+- `report.html` with some useful visualizations, diagnostics and metrics
 
 ### Aggregation & Visualization for the Publication
 
