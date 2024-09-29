@@ -6,7 +6,6 @@ import jax.nn.initializers as jinit
 import jax.numpy as jnp
 import jax.scipy.stats as stats
 from jax.flatten_util import ravel_pytree
-from jax.tree_util import DictKey, tree_map_with_path
 
 from src.config.base import BaseStrEnum
 from src.types import ParamTree

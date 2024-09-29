@@ -1,4 +1,9 @@
-"""Summarizes the results of the multiple experiments."""
+"""
+Summarizes the results of the multiple experiments.
+
+To be executed from the root directory of the project. Filters and the directory
+containing the results can be set in the variables FILTER and DIR.
+"""
 import os
 import pickle
 import sys
@@ -6,10 +11,10 @@ from pathlib import Path
 
 import pandas as pd
 
-sys.path.append('../..')
+sys.path.append(os.path.abspath('.'))
 from src.config.core import Config
 
-DIR = '../../results/hyper_params_ablation' # Directory containing the results
+DIR = 'results/hyper_params_ablation' # Directory containing the results
 DIR = Path(DIR)
 FILTER = 'bike' # Filter the directories by this string
 

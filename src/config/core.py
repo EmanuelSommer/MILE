@@ -107,62 +107,62 @@ class Config(BaseConfig):
             definition `LeNet`. it additionally adds some extra fields we do not
             intend to configure from the config file.
 
-        Example::
-        ```python
-        # Defining Configuration
-        from dataclasses import dataclass, field
-        from src.config.models.base import ModelConfig, Activation
+        Example:
 
-        @dataclass(frozen=True)
-        class LeNetConfig(ModelConfig):
-            model: str = 'LeNet'
-            activation: Activation = field(default=Activation.SIGMOID)
-            use_bias: bool = True
-            outdim: int = 10
+            # Defining Configuration
+            from dataclasses import dataclass, field
+            from src.config.models.base import ModelConfig, Activation
 
-        # Defining Model
-        import flax.linen as nn
-        import jax.numpy as jnp
+            @dataclass(frozen=True)
+            class LeNetConfig(ModelConfig):
+                model: str = 'LeNet'
+                activation: Activation = field(default=Activation.SIGMOID)
+                use_bias: bool = True
+                outdim: int = 10
 
-        class LeNet(nn.Module):
-            config: LeNetConfig
-            some_fix_param: int = 10
-            some_other_fix_param = nn.Dense(10)
+            # Defining Model
+            import flax.linen as nn
+            import jax.numpy as jnp
 
-            @nn.compact
-            def __call__(self, x: jnp.ndarray):
-                '''
-                Forward pass.
+            class LeNet(nn.Module):
+                config: LeNetConfig
+                some_fix_param: int = 10
+                some_other_fix_param = nn.Dense(10)
 
-                Parameters
-                    x (jnp.ndarray):
-                        The input data of shape (batch_size, channels, height, width).
-                '''
-                act = self.config.activation.flax_activation
-                x = x.transpose((0, 2, 3, 1))
-                x = nn.Conv(
-                    features=6, kernel_size=(5, 5), strides=(1, 1), name='conv1'
-                )(x)
-                x = nn.avg_pool(
-                    act(x), window_shape=(2, 2), strides=(2, 2), padding='VALID'
-                )
-                x = nn.Conv(
-                    features=16, kernel_size=(5, 5), strides=(1, 1), name='conv2'
-                )(x)
-                x = nn.avg_pool(
-                    act(x), window_shape=(2, 2), strides=(2, 2), padding='VALID'
-                )
-                x = x.reshape((x.shape[0], -1))
-                x = nn.Dense(features=120, use_bias=self.config.use_bias, name='fc1')(x)
-                x = nn.Dense(
-                    features=84, use_bias=self.config.use_bias, name='fc2'
-                )(act(x))
-                x = nn.Dense(
-                    features=self.config.outdim,
-                    use_bias=self.config.use_bias,
-                    name='fc3'
-                )(act(x))
-                return x
+                @nn.compact
+                def __call__(self, x: jnp.ndarray):
+                    '''
+                    Forward pass.
+
+                    Parameters
+                        x (jnp.ndarray):
+                            The input data of shape (batch_size, channels, height, width).
+                    '''
+                    act = self.config.activation.flax_activation
+                    x = x.transpose((0, 2, 3, 1))
+                    x = nn.Conv(
+                        features=6, kernel_size=(5, 5), strides=(1, 1), name='conv1'
+                    )(x)
+                    x = nn.avg_pool(
+                        act(x), window_shape=(2, 2), strides=(2, 2), padding='VALID'
+                    )
+                    x = nn.Conv(
+                        features=16, kernel_size=(5, 5), strides=(1, 1), name='conv2'
+                    )(x)
+                    x = nn.avg_pool(
+                        act(x), window_shape=(2, 2), strides=(2, 2), padding='VALID'
+                    )
+                    x = x.reshape((x.shape[0], -1))
+                    x = nn.Dense(features=120, use_bias=self.config.use_bias, name='fc1')(x)
+                    x = nn.Dense(
+                        features=84, use_bias=self.config.use_bias, name='fc2'
+                    )(act(x))
+                    x = nn.Dense(
+                        features=self.config.outdim,
+                        use_bias=self.config.use_bias,
+                        name='fc3'
+                    )(act(x))
+                    return x
         """
         if isinstance(model, str):
             if model not in models_module.__all__:
