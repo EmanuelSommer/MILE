@@ -25,7 +25,7 @@ def main():
     diagnostics = []
     all_dirs = os.listdir(DIR)
     filtered_dirs = [
-        d for d in all_dirs if FILTER in d and 'air' not in d and 'pdf' not in d
+        d for d in all_dirs if FILTER in d and 'aggr' not in d and 'pdf' not in d
     ]
     for path in filtered_dirs:
         config = Config.from_file(DIR / Path(path) / 'config.yaml')
@@ -42,6 +42,10 @@ def main():
             tmp['cal_error'] = metrics['cal_error']
         if 'de_cal_error' in metrics:
             tmp['de_cal_error'] = metrics['de_cal_error']
+        coverage_entries = [m for m in metrics.keys() if 'coverage' in m]
+        if len(coverage_entries) > 0:
+            for c in coverage_entries:
+                tmp[c] = metrics[c]
         if config.data.task == 'regr':
             tmp['rmse'] = metrics['rmse']
             tmp['de_rmse'] = metrics['de_rmse']

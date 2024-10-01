@@ -327,6 +327,9 @@ def evaluate_de(
             print('_' * 50)
             print(f'Calibration Error: {cal_error:.4f}')
             metrics_dict['de_cal_error'] = cal_error
+            for i, cov in enumerate(nominal_coverages):
+                print(f'Coverage for {cov}: {coverage[i]:.4f}')
+                metrics_dict[f'de_coverage_{cov}'] = coverage[i]
     return preds, metrics_dict
 
 
@@ -528,4 +531,7 @@ def evaluate_bde(
             print('_' * 50)
             print(f'Calibration Error: {cal_error:.4f}')
             metrics_dict['cal_error'] = cal_error
+            for i, cov in enumerate(nominal_coverages):
+                print(f'Coverage for {cov}: {coverage[i]:.4f}')
+                metrics_dict[f'coverage_{cov}'] = coverage[i]
     return preds_over_chains, metrics_dict

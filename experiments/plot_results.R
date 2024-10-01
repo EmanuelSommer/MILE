@@ -962,3 +962,96 @@ for (diagn in c("ess", "bcv", "wcv", "crhat")) {
 
     ggsave(paste0(DIR, "/", diagn, FILTER, ".pdf"), plt, width = 6, height = 6)
 }
+
+
+# Coverage Plots #######################################################################
+DIR = "results/repl_uci"
+FILTER = "_mclmc"
+results_mclmc = read.csv(paste0(DIR, "/aggr_results", FILTER, ".csv"))
+FILTER = "_nuts"
+results_nuts = read.csv(paste0(DIR, "/aggr_results", FILTER, ".csv"))
+FILTER = "_de"
+results_de = read.csv(paste0(DIR, "/aggr_results", FILTER, ".csv"))
+
+coverage_levels <- colnames(results_de) |>
+    stringr::str_subset("de_coverage_\\d+\\.\\d+") |>
+    stringr::str_extract("\\d+\\.\\d+") |>
+    as.numeric()
+
+coverage_df <- results_mclmc |> select(data, rng, starts_with("coverage_")) |>
+    pivot_longer(cols = starts_with("coverage_"), names_to = "nominal_coverage", values_to = "empirical_coverage") |>
+    mutate(sampler = "MILE") |>
+    bind_rows(
+        results_nuts |> select(data, rng, starts_with("coverage_")) |>
+            pivot_longer(cols = starts_with("coverage_"), names_to = "nominal_coverage", values_to = "empirical_coverage") |>
+            mutate(sampler = "BDE")
+    ) |>
+    bind_rows(
+        results_de |> select(data, rng, starts_with("de_coverage_")) |>
+            pivot_longer(cols = starts_with("de_coverage_"), names_to = "nominal_coverage", values_to = "empirical_coverage") |>
+            mutate(sampler = "DE")
+    ) |>
+    mutate(
+        nominal_coverage = as.numeric(stringr::str_extract(nominal_coverage, "\\d+\\.\\d+")),
+        empirical_coverage = as.numeric(empirical_coverage)
+    )
+
+coverage_df |>
+    group_by(data, sampler, nominal_coverage) |>
+    summarize(mean = mean(empirical_coverage), sd = sd(empirical_coverage)) |>
+    arrange(nominal_coverage) |>
+    View()
+
+coverage_plot <- coverage_df |>
+    group_by(sampler, nominal_coverage) |>
+    summarize(
+        mean = mean(empirical_coverage),
+        sd = sd(empirical_coverage)
+    ) |>
+    ggplot(aes(x = nominal_coverage, y = mean, color = sampler)) +
+    geom_line(linewidth = 1) +
+    geom_ribbon(
+        aes(ymin = mean - sd, ymax = mean + sd, fill = sampler),
+        alpha = 0.2,
+        color = NA
+    ) +
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+    labs(x = "Nominal Coverage", y = "Empirical Coverage", color = "", fill = "") +
+    scale_color_manual(values = c("MILE" = "#F35B04", "BDE" = "#3D348B", "DE" = "grey")) +
+    scale_fill_manual(values = c("MILE" = "#F35B04", "BDE" = "#3D348B", "DE" = "grey")) +
+    scale_x_continuous(breaks = coverage_levels) +
+    scale_y_continuous(breaks = coverage_levels) +
+    theme(aspect.ratio = 1)
+coverage_plot
+
+data_coverage_plot <- coverage_df |>
+    group_by(data, sampler, nominal_coverage) |>
+    summarize(
+        mean = mean(empirical_coverage),
+        sd = sd(empirical_coverage)
+    ) |>
+    mutate(sampler = factor(sampler, levels = c("DE", "BDE", "MILE"))) |>
+    ggplot(aes(x = nominal_coverage, y = mean, color = sampler)) +
+    geom_line(linewidth = 1) +
+    geom_ribbon(
+        aes(ymin = mean - sd, ymax = mean + sd, fill = sampler),
+        alpha = 0.2,
+        color = NA
+    ) +
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+    labs(x = "Nominal Coverage", y = "Empirical Coverage", color = "", fill = "") +
+    scale_color_manual(values = c("MILE" = "#F35B04", "BDE" = "#3D348B", "DE" = "grey")) +
+    scale_fill_manual(values = c("MILE" = "#F35B04", "BDE" = "#3D348B", "DE" = "grey")) +
+    scale_x_continuous(breaks = coverage_levels) +
+    scale_y_continuous(breaks = coverage_levels) +
+    facet_wrap(~data, ncol = 3) +
+    theme(
+        aspect.ratio = 1,
+        axis.text.x = element_text(angle = 50, hjust = 1, size = fontsize_ticks_legends),
+        panel.grid.minor = element_blank()
+    )
+
+data_coverage_plot
+
+ggsave(paste0(DIR, "/coverage", ".pdf"), data_coverage_plot, width = 12, height = 7)
+
