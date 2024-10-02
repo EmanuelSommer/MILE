@@ -44,11 +44,17 @@ class AttentionClassifierConfig(GPTConfig):
     n_classes: int = field(
         default=2, metadata={'description': 'Number of classes for classification'}
     )
+    projection_dim: list[int] = field(
+        hash=False,
+        default_factory=lambda: [32],
+        metadata={'description': 'Projection dimensions'},
+    )
 
 
 @dataclass(frozen=True)
 class PretrainedAttentionClassifierConfig(AttentionClassifierConfig):
     """Pretrained Attention Classifier Configuration."""
+
     model: str = 'PretrainedAttentionClassifier'
     emb_path: str = field(
         default=None, metadata={'description': 'Path to pretrained embeddings'}

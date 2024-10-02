@@ -51,14 +51,15 @@ class AttentionClassifier(nn.Module):
         out = jnp.mean(out, axis=1)
 
         # Projection
-        out = nn.Dense(
-            2 * self.config.emb_size,
-            dtype=dtype,
-            use_bias=self.config.bias,
-            name='projection',
-        )(out)
-        out = nn.gelu(out)
-        # out = nn.Dropout(self.config.dropout, deterministic=not train)(out)
+        for proj_id, proj_dim in enumerate(self.config.projection_dim):
+            out = nn.Dense(
+                proj_dim,
+                dtype=dtype,
+                use_bias=self.config.bias,
+                name=f'projection_{proj_id}',
+            )(out)
+            out = nn.gelu(out)
+            # out = nn.Dropout(self.config.dropout, deterministic=not train)(out)
 
         # Classification
         logits = nn.Dense(
@@ -72,7 +73,9 @@ class AttentionClassifier(nn.Module):
 
 class PretrainedAttentionClassifier(nn.Module):
     """Attention-based classifier."""
+
     config: PretrainedAttentionClassifierConfig
+
     @nn.compact
     def __call__(self, x: jnp.ndarray, pad_id: int = 0, train: bool = True):
         """Forward pass."""
@@ -101,17 +104,24 @@ class PretrainedAttentionClassifier(nn.Module):
             name='MDPA',
         )(x, mask=mask)
         # out = nn.LayerNorm(dtype=dtype)(out)
+
         # Average Pooling
         out = jnp.mean(out, axis=1)
+
         # Projection
-        out = nn.Dense(
-            32,
-            dtype=dtype,
-            use_bias=self.config.bias,
-            name='projection',
-        )(out)
+        for proj_id, proj_dim in enumerate(self.config.projection_dim):
+            out = nn.Dense(
+                proj_dim,
+                dtype=dtype,
+                use_bias=self.config.bias,
+                name=f'projection_{proj_id}',
+            )(out)
+            out = nn.gelu(out)
+            # out = nn.Dropout(self.config.dropout, deterministic=not train)(out)
+
         out = nn.gelu(out)
         # out = nn.Dropout(self.config.dropout, deterministic=not train)(out)
+
         # Classification
         logits = nn.Dense(
             self.config.n_classes,
