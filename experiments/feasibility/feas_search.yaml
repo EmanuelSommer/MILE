@@ -1,0 +1,6 @@
+data:
+  path:
+  - 'data/airfoil.data'
+  - 'data/concrete.data'
+  - 'data/energy.data'
+  - 'data/yacht.data'

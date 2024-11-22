@@ -329,10 +329,8 @@ def GaussianNLLLoss(x: jnp.ndarray, mu: jnp.ndarray, sigma: jnp.ndarray):
     jnp.array:
         The computed loss.
     """
-    return jnp.log(
-        (jnp.sqrt(2 * jnp.pi) * jnp.clip(sigma, 1e-5))
-        + (x - mu) ** 2 / (2 * jnp.clip(sigma, 1e-5) ** 2)
-    )
+    sigma = jnp.clip(sigma, 1e-5)  # Ensure stability in calculations
+    return 0.5 * jnp.log(2 * jnp.pi * sigma**2) + ((x - mu) ** 2) / (2 * sigma**2)
 
 
 def SELoss(x: jnp.ndarray, mu: jnp.ndarray):

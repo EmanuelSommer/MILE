@@ -1,4 +1,5 @@
 """Evaluation functions for DE and BDE models."""
+
 from typing import Optional, Union
 
 import flax.linen as nn
@@ -9,7 +10,7 @@ from scipy.stats import mode
 import src.inference.metrics as metrics
 from src.config.data import Task
 from src.inference.utils import count_chains, count_samples
-from src.types import ParamTree
+from src.types import ParamTree, PRNGKey
 
 
 def predict_from_samples(
@@ -33,11 +34,8 @@ def predict_from_samples(
     jnp.ndarray
         Predictions of shape (n_samples, B, ...).
     """
-    # vapply = jax.vmap(partial(model.apply, **kwargs), in_axes=(0, None))
-    # predictions = vapply({'params': samples}, x)
-    # do it sequentially for now (memory issues)
-    predictions = []
     n_samples = jax.tree_util.tree_leaves(samples)[0].shape[0]
+    predictions = []
     for i in range(n_samples):
         params = jax.tree_map(lambda x: x[i], samples)
         predictions.append(model.apply({'params': params}, x, **kwargs))
@@ -46,7 +44,7 @@ def predict_from_samples(
 
 
 def sample_from_predictions(
-    predictions: jnp.ndarray, task: Task, rng_key: jnp.ndarray
+    predictions: jnp.ndarray, task: Task, rng_key: PRNGKey
 ) -> jnp.ndarray:
     """Sample predictions from n_sample forward pass predictions.
 
@@ -89,7 +87,7 @@ def calibration_error(
 def coverage_weighting(
     nominal_coverage: Union[jnp.ndarray, list], kappa: float = 1.0
 ) -> jnp.ndarray:
-    """Calculate a coverage weighting."""
+    """Calculate a possibly increasing coverage weighting."""
     if isinstance(nominal_coverage, list):
         nominal_coverage = jnp.array(nominal_coverage)
     return (nominal_coverage**kappa) / jnp.sum(nominal_coverage**kappa)
@@ -212,10 +210,10 @@ def evaluate_de(
     labels: jnp.ndarray,
     task: Task,
     batch_size: int | None,
+    rng_key: PRNGKey = jax.random.PRNGKey(42),
     verbose: bool = True,
     metrics_dict: dict = {},
     n_samples: int = 0,
-    rng_key: jnp.ndarray = jax.random.PRNGKey(42),
     nominal_coverages: Optional[list] = None,
     **kwargs,
 ) -> tuple[jnp.ndarray, dict]:
@@ -235,14 +233,14 @@ def evaluate_de(
         Task type (classification or regression).
     batch_size: int | None
         Batch size for prediction.
+    rng_key: PRNGKey
+        Random key for sampling from the estimated distribution.
     verbose: bool
         Verbosity flag.
     metrics_dict: dict
         Dict to store metrics.
     n_samples: int
         Number of samples to draw from the posterior.
-    rng_key: jnp.ndarray
-        Random key for sampling from the posterior.
     nominal_coverages: list
         List of nominal coverages for calibration error.
     kwargs: dict
@@ -417,7 +415,7 @@ def evaluate_bde(
     batch_size: int | None,
     verbose: bool = True,
     metrics_dict: dict = {},
-    key: jax.Array = jax.random.PRNGKey(42),
+    rng_key: PRNGKey = jax.random.PRNGKey(42),
     nominal_coverages: Optional[list] = None,
     **kwargs,
 ) -> tuple[jnp.ndarray, dict]:
@@ -441,7 +439,7 @@ def evaluate_bde(
         Verbosity flag.
     metrics_dict: dict
         Dict to store metrics.
-    key: jax.Array
+    rng_key: PRNGKey
         Random key for sampling from the posterior.
     kwargs: dict
         Additional arguments for prediction.
@@ -458,7 +456,7 @@ def evaluate_bde(
     preds_over_chains = predict_bde(
         params, module, features, labels, batch_size, verbose, **kwargs
     )
-    preds = sample_from_predictions(preds_over_chains, task=task, rng_key=key)
+    preds = sample_from_predictions(preds_over_chains, task=task, rng_key=rng_key)
 
     # Classification
     if task == Task.CLASSIFICATION:
@@ -468,6 +466,7 @@ def evaluate_bde(
         lppd = metrics.lppd(
             lppd_pointwise=metrics.pointwise_lppd(preds_over_chains, labels, task=task)
         )
+        nll = metrics.pointwise_lppd(preds_over_chains, labels, task=task).mean() * -1.0
         acc = jnp.mean(
             labels == mode(preds, axis=(0, 1)).mode
         )  # Mode over (Chain, Sam)
@@ -476,6 +475,7 @@ def evaluate_bde(
         )  # noqa
         # add lppd and acc to metrics dict
         metrics_dict['lppd'] = lppd
+        metrics_dict['nll'] = nll
         metrics_dict['acc'] = acc
         print('_' * 50)
 
@@ -500,6 +500,12 @@ def evaluate_bde(
                 preds_over_chains[~nan_chains], labels, task=task
             )
         )
+        nll = (
+            metrics.pointwise_lppd(
+                preds_over_chains[~nan_chains], labels, task=task
+            ).mean()
+            * -1.0
+        )
         rmse = jnp.sqrt(
             # Mean over (Chain, Samp)
             jnp.mean((labels - preds[~nan_chains].mean(axis=[0, 1])) ** 2)
@@ -508,6 +514,7 @@ def evaluate_bde(
             f'Bayesian Deep Ensemble Performance | LPPD: {lppd:.3f}, RMSE: {rmse:.4f}'  # noqa
         )
         metrics_dict['lppd'] = lppd
+        metrics_dict['nll'] = nll
         metrics_dict['rmse'] = rmse
         print('_' * 50)
 

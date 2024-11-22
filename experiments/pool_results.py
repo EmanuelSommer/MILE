@@ -1,9 +1,4 @@
-"""
-Summarizes the results of the multiple experiments.
-
-To be executed from the root directory of the project. Filters and the directory
-containing the results can be set in the variables FILTER and DIR.
-"""
+"""Summarizes the results of the multiple experiments."""
 import os
 import pickle
 import sys
@@ -11,12 +6,12 @@ from pathlib import Path
 
 import pandas as pd
 
-sys.path.append(os.path.abspath('.'))
-from src.config.core import Config
+sys.path.append('../..')
+from src.config.core import Config  # noqa: E402
 
-DIR = 'results/hyper_params_ablation' # Directory containing the results
+DIR = '../../results/mclmc_paper/tabular_classif'
 DIR = Path(DIR)
-FILTER = 'bike' # Filter the directories by this string
+FILTER = 'uci'
 
 
 def main():
@@ -38,6 +33,8 @@ def main():
 
         tmp['lppd'] = metrics['lppd']
         tmp['de_lppd'] = metrics['de_lppd']
+        if 'nll' in metrics:
+            tmp['nll'] = metrics['nll']
         if 'cal_error' in metrics:
             tmp['cal_error'] = metrics['cal_error']
         if 'de_cal_error' in metrics:
@@ -46,6 +43,7 @@ def main():
         if len(coverage_entries) > 0:
             for c in coverage_entries:
                 tmp[c] = metrics[c]
+
         if config.data.task == 'regr':
             tmp['rmse'] = metrics['rmse']
             tmp['de_rmse'] = metrics['de_rmse']

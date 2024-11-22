@@ -1055,3 +1055,17 @@ data_coverage_plot
 
 ggsave(paste0(DIR, "/coverage", ".pdf"), data_coverage_plot, width = 12, height = 7)
 
+# UCI tabular classid #############################################################
+DIR = "results/tabular_classif"
+FILTER = "_uci"
+
+results = read.csv(paste0(DIR, "/aggr_results", FILTER, ".csv"))
+
+results |>
+    group_by(data) |>
+    summarize(
+        mean_acc = mean(acc), sd_acc = sd(acc),
+        mean_lppd = mean(lppd), sd_lppd = sd(lppd),
+        mean_nll = mean(nll), sd_nll = sd(nll),
+        mean_time = mean(total_time / 60), sd_time = sd(total_time / 60)
+    )
