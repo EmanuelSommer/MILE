@@ -4,7 +4,16 @@
     <img src="flowchart.png" alt="Flowchart" style="width: 70%;">
 </p>
 
-This repository contains the code for the **ICLR 2025** submission **"Microcanonical Langevin Ensembles: Advancing the Sampling of Bayesian Neural Networks"**. A flowchart summarizing the proposed method is shown above.
+This repository contains the code for the **ICLR 2025** submission **"Microcanonical Langevin Ensembles: Advancing the Sampling of Bayesian Neural Networks"**. A flowchart summarizing the proposed method is shown above. 
+
+**MILE** generates high-quality samples significantly faster than competing methods, outperforming sequential approaches like NUTS and MCLMC by a large margin. The GIF below illustrates this with a distributional regression task on the UCI `airfoil` dataset using a fully connected BNN with 3 hidden layers (configs under `experiments/illustrative_example_readme`). Each curve shows **LPPD progression** as more samples are collected, with highlighted points marking the maximum LPPD for each method. The **runtime is proportional to the GIF's speed**, and the dashed line indicates the reference LPPD from Deep Ensemble.
+
+
+<div align="center">
+  <img src="running_stats_animation.gif" alt="" width="60%">
+</div>
+
+Below we provide a brief overview of the repository structure and how to run the experiments.
 
 ## Setup
 
